@@ -15,7 +15,6 @@
 (defun root (x) (sqrt (abs x)))
 (defun w-mod (x y) (mod x (if (= y 0) 2 y)))
 (defun divide (x y) (/ x (if (= y 0) (+ 1 (random 300) )y)))
-
 (defun w-or (x y) (logorc1 (floor x) (floor y)))
 (defun w-and (x y) (logand (floor x) (floor y)))
 (defun w-nor (x y) (lognor (floor x) (floor y)))
@@ -31,18 +30,17 @@
   (8 '-)
   (8 '*)
   (1 'root)
-  (1 'w-log)
-  (6 'w-mod)
+  (2 'w-log)
+  (2 'w-mod)
   (3 'divide)
   (4 'w-or)
   (2 'w-and)
-  (1 'w-nor)
-  (8 'w-xor)
-  (2 ' w-gcd)
-  (2 ' w-lcm)
+  (3 'w-nor)
+  (3 'w-xor)
+  (2 'w-gcd)
+  (2 'w-lcm)
   (1 'sin)
-  (2 'w-square)
-					; (10 'atan)
+  (2 'w-square)                                        
   (5 'w-cosh)
   (6 'l2-norm))
 
@@ -73,7 +71,7 @@
       (random-int)
       (random-float)))
 
-(defparameter max-exps 25)
+(defparameter max-exps 23)
 (defparameter cur-exps 0)
 
 (defun rand-exp ()
@@ -85,8 +83,10 @@
 	  (cond
 	    ((find func '(sin w-square sqrt root w-log atan w-cosh))
 	     (list func (rand-val)))
+	    
 	    ((find func '(l2-norm))
 	     (list func (rand-val) (rand-val) (rand-val) (rand-val)))
+	    
 	    (t (list func (rand-val) (rand-val))))))))
 
 (defun rand-root ()
@@ -101,19 +101,19 @@
     (loop for x below width do
       (loop for y below height do
 	(setf (opticl:pixel img y x)   
-	      (mod (floor (funcall func (+ 1 x) (+ y 1))) 256))))
+	      (8-bit-wrapper func x y (w-xor (+ 1 x) (+ 1 y))))))
     (opticl:write-png-file "./output/out.png" img)))
 
 (defun gen-rgb-img (width height)
   (let* ((root (rand-root))
 	 (func (eval root))
-	 (img (opticl:make-8-bit-rgb-image height width)))
+	 (img (opticl:make-16-bit-rgb-image height width)))
     (print root)
     (loop for x below width do
       (loop for y below height do
 	(setf (opticl:pixel img y x)
-	      (8-bit-rgb-wrapper func x y))))
-    (opticl:write-png-file "./output/out.png" img)))
+	      (16-bit-rgb-wrapper func x y))))
+    (opticl:write-tiff-file "./output/out.tiff" img)))
 
 (defun recover-img (width height function)
   (let* ((func (eval function))
@@ -132,3 +132,12 @@
 
 (defun 8-bit-wrapper (func x y c)
   (mod (floor (funcall func (+ x 1) (+ y 1) c)) 256))
+
+(defun 16-bit-rgb-wrapper (func x y)
+  (values (16-bit-wrapper func x y 2)
+	  (16-bit-wrapper func x y 60)
+	  (16-bit-wrapper func x y 12)))
+
+(defun 16-bit-wrapper (func x y c)
+  (mod (floor (funcall func (+ x 1) (+ y 1) c)) 65536))
+
