@@ -11,7 +11,7 @@
 		   for x = (car form) then (+ x (car form))
 		   collect `((> ,x ,val) ,(cadr form))))))))
 
-(defun square (x) (* x x))
+(defun w-square (x) (* x x))
 (defun root (x) (sqrt (abs x)))
 (defun w-mod (x y) (mod x (if (= y 0) 2 y)))
 (defun divide (x y) (/ x (if (= y 0) (+ 1 (random 300) )y)))
@@ -22,26 +22,29 @@
 (defun w-xor (x y) (logxor (floor x) (floor y)))
 (defun w-gcd (x y) (gcd (ceiling x) (ceiling y)))
 (defun w-lcm (x y) (lcm (ceiling x) (ceiling y)))
-(defun w-cosh (x) (cosh (log x)))
+(defun w-log (x) (if (= 0 x) 0 (log (abs x))))
+(defun w-cosh (x) (cosh (w-log  x)))
+(defun l2-norm (x y a b) (sqrt (+ (expt (- x a) 2) (expt (- y b) 2))))
 
 (defweightedrandom random-func
-    (4 '+)
-    (2 '-)
-    (2 '*)
-    (7 'root)
-    (1 'log)
-    (6 'w-mod)
-    (3 'divide)
-    (1 'w-or)
-    (2 'w-and)
-    (1 'w-nor)
-    (2 'w-xor)
-    (2 ' w-gcd)
-    (2 ' w-lcm)
-    (1 'sin)
-    (5 'square)
-    (10 'atan)
-    (10 'w-cosh))
+  (8 '+)
+  (8 '-)
+  (8 '*)
+  (1 'root)
+  (1 'w-log)
+  (6 'w-mod)
+  (3 'divide)
+  (4 'w-or)
+  (2 'w-and)
+  (1 'w-nor)
+  (8 'w-xor)
+  (2 ' w-gcd)
+  (2 ' w-lcm)
+  (1 'sin)
+  (2 'w-square)
+					; (10 'atan)
+  (5 'w-cosh)
+  (4 'l2-norm))
 
 (defweightedrandom rand-val
   (1 (random-int))
@@ -55,8 +58,8 @@
 
 (defun random-value ()
   (if (= (random 2) 0)
-      (random-number)
-      (random-exp)))
+      (random-int)
+      (rand-exp)))
 
 (defun random-int ()
   (+ 1(random 999)))
@@ -70,13 +73,24 @@
       (random-int)
       (random-float)))
 
+(defparameter max-exps 25)
+(defparameter cur-exps 0)
+
 (defun rand-exp ()
-  (let ((func (random-func)))
-    (if (find func '(sin square sqrt root log atan cosh))
-	(list func (rand-val))
-	(list func (rand-val) (rand-val)))))
+  (if (> cur-exps max-exps)
+      (random-value)
+      (progn
+	(setq cur-exps (+ 1 cur-exps))
+	(let ((func (random-func)))
+	  (cond
+	    ((find func '(sin w-square sqrt root w-log atan w-cosh))
+	     (list func (rand-val)))
+	    ((find func '(l2-norm))
+	     (list func (rand-val) (rand-val) (rand-val) (rand-val)))
+	    (t (list func (rand-val) (rand-val))))))))
 
 (defun rand-root ()
+  (setq cur-exps 0)
   (list 'lambda '(x y c) (rand-exp)))
 
 (defun gen-img (width height)
@@ -88,7 +102,7 @@
       (loop for y below height do
 	(setf (opticl:pixel img y x)   
 	      (mod (floor (funcall func (+ 1 x) (+ y 1))) 256))))
-    (opticl:write-png-file "~/Desktop/out.png" img)))
+    (opticl:write-png-file "./output/out.png" img)))
 
 (defun gen-rgb-img (width height)
   (let* ((root (rand-root))
@@ -99,14 +113,12 @@
       (loop for y below height do
 	(setf (opticl:pixel img y x)
 	      (8-bit-rgb-wrapper func x y))))
-    (opticl:write-png-file "~/Desktop/out.png" img)))
+    (opticl:write-png-file "./output/out.png" img)))
 
 (defun 8-bit-rgb-wrapper (func x y)
   (values (8-bit-wrapper func x y 3)
 	  (8-bit-wrapper func x y 9)
 	  (8-bit-wrapper func x y 80)))
-
-(defun square (x) (* x x))
 
 (defun 8-bit-wrapper (func x y c)
   (mod (floor (funcall func (+ x 1) (+ y 1) c)) 256))
