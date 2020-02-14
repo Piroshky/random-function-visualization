@@ -44,7 +44,7 @@
   (2 'w-square)
 					; (10 'atan)
   (5 'w-cosh)
-  (4 'l2-norm))
+  (6 'l2-norm))
 
 (defweightedrandom rand-val
   (1 (random-int))
@@ -109,6 +109,16 @@
 	 (func (eval root))
 	 (img (opticl:make-8-bit-rgb-image height width)))
     (print root)
+    (loop for x below width do
+      (loop for y below height do
+	(setf (opticl:pixel img y x)
+	      (8-bit-rgb-wrapper func x y))))
+    (opticl:write-png-file "./output/out.png" img)))
+
+(defun recover-img (width height function)
+  (let* ((func (eval function))
+	 (img (opticl:make-8-bit-rgb-image height width)))
+    (print function)
     (loop for x below width do
       (loop for y below height do
 	(setf (opticl:pixel img y x)
