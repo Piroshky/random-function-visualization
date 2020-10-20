@@ -2,12 +2,12 @@ Code that creates functions which take an x and y position, and a color value, a
 
 Examples:
 
-[1](https://i.imgur.com/VMglKHU.png)
+![](https://i.imgur.com/VMglKHU.png)
 
-[2](https://i.imgur.com/l8OYTux.png)
+![](https://i.imgur.com/l8OYTux.png)
 
-[3](https://i.imgur.com/ZvapKnh.png)
+![](https://i.imgur.com/ZvapKnh.png)
 
-[4](https://i.imgur.com/DERByjN.png)
+![](https://i.imgur.com/DERByjN.png)
 
 Inspired by [Mytino's](https://www.reddit.com/r/proceduralgeneration/comments/f02smu/visualization_of_random_generated_functions_zoom/) work.
