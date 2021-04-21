@@ -1,9 +1,15 @@
-(ql:quickload 'opticl)
-(ql:quickload 'local-time)
-(use-package :opticl :local-time)
+(defpackage :random-function-visualization
+  (:nicknames :rfv)
+  (:use #:cl+qt)
+  (:export #:gen-img
+	   #:create-form
+	   #:qt-gen-rgb-img
+	   #:qt-recover-rgb-img
+	   #:qt-load-rgb-img))
+(in-package :random-function-visualization)
+(in-readtable :qtools)
 
-
-(defparameter *function-save-file* "./functions"
+(defparameter *function-save-file* "functions"
   "file where functions will be saved to ")
 
 ;; Macro that lets you create functions that will randomly return
@@ -15,7 +21,7 @@
 	(val (gensym))
 	(rs (make-random-state t)))
     `(defun ,name ,params
-       (let ((,val (random ,total ,rs)))
+       (let ((,val (random ,total (make-random-state t))))
 	 (cond 
 	   ,@(loop for form in body
 		   for x = (car form) then (+ x (car form))
@@ -43,43 +49,43 @@
 ;; (x 'func-name) x is number of parameters func-name takes
 (defweightedrandom random-func ()
   (5 '(2 +))
-  (5 '(2 -))
+  (2 '(2 -))
   (5 '(2 *))
   (2 '(1 abs))
-  (2 '(1 root))
-  (2 '(1 w-log))
-  (5 '(2 w-mod))
-  (5 '(2 divide))
+  (1 '(1 root))
+  (1 '(1 w-log))
+  (2 '(2 w-mod))
+  (4 '(2 divide))
   (1 '(2 w-or))
   (1 '(2 w-and))
   (1 '(2 w-nor))
   (1 '(2 w-xor))
   (1 '(2 w-gcd))
   (1 '(2 w-lcm))
-  (4 '(1 sin))
-  (3 '(1 cos))
+  (2 '(1 sin))
+  (2 '(1 cos))
   (3 '(1 w-square))                                        
-  (2 '(1 w-cosh))
-  (2 '(1 tanh))
-  (3 '(4 l2-norm))
-  (3 '(2 min))
-  (3 '(2 max))
+  (1 '(1 w-cosh))
+  (1 '(1 tanh))
+  (2 '(4 l2-norm))
+  (2 '(2 min))
+  (2 '(2 max))
   (2 '(1 int-sum))
-  (1 'if)
+  (2 'if)
   )
 
 (defweightedrandom rand-value ()
   (2 (random-int))
   (1 (random-float))
-  (6 (rand-exp))
-  (5 (rand-sym)))
+  (5 (rand-exp))
+  (4 (rand-sym)))
 
 (defweightedrandom rand-sym ()
-  (3 'x)
-  (3 'y)
+  (6 'x)
+  (6 'y)
   (3 'r)
   (4 'theta)
-  (4 'c))
+  (5 'c))
 
 (defun n= (a b)
   (not (= a b)))
@@ -100,8 +106,8 @@
   (not (eq a b)))
 
 (defweightedrandom rand-logic-op ()
-  (1 'and)
-  (4 'or)
+  (2 'and)
+  (2 'or)
   (1 'eq)
   (2 'nand)
   (2 'xor))
@@ -138,7 +144,7 @@
       (random-int)
       (random-float)))
 
-(defparameter max-exps 33)
+(defparameter max-exps 45)
 (defparameter cur-exps 0)
 
 (defun rand-exp ()
@@ -162,6 +168,8 @@
   (list 'lambda '(x y r theta c) (rand-exp)))
 
 (defun gen-img (width height &key (auto-save nil) (save-dir "./output/") (img-color :rgb))
+  (make-random-state t)
+  (ensure-directories-exist save-dir)
   (case img-color
     (:rgb (gen-rgb-img width height :auto-save auto-save :save-dir save-dir))
     ((:grey :gray) (gen-grey-img width height :auto-save auto-save :save-dir save-dir))
@@ -185,11 +193,11 @@
 		(8-bit-wrapper func (coords x y height width) c))))
       (opticl:write-png-file image-path img)
       (if (or auto-save (y-or-n-p (format nil "save function `~a`?" birth)))
-	  (with-open-file (str (concatenate 'string save-dir "functions")
+	  (with-open-file (str (concatenate 'string save-dir *function-save-file*)
 			       :direction :output
 			       :if-exists :append
 			       :if-does-not-exist :create)
-	    (format str "~a~%~%"
+	    (format str "~s~%~%"
 		    (list birth :grey c root)))
 	  (delete-file image-path)))))
  
@@ -202,7 +210,7 @@
 	   (r (random 255))
 	   (g (random 255))
 	   (b (random 255)))
-      (unless nil;;auto-save
+      (unless auto-save
 	(format t "~a~%(~a ~a ~a)" birth r g b)
 	(print root))
       (loop for x below width do
@@ -211,27 +219,102 @@
 		(8-bit-rgb-wrapper func (coords x y height width) r g b))))
       (opticl:write-png-file image-path img)
       (if (or auto-save (y-or-n-p (format nil "save function `~a`?" birth)))
-	  (with-open-file (str (concatenate 'string save-dir "functions")
+	  (with-open-file (str (concatenate 'string save-dir *function-save-file*)
 			       :direction :output
 			       :if-exists :append
 			       :if-does-not-exist :create)
-	    (format str "~a~%~%"
+	    (format str "~s~%~%"
 		    (list birth
 			  :8-rgb (list r g b)
 			  root)))
 	  (delete-file image-path)))))
 
+(defmacro match-bind (pattern object &body body)
+  `(loop with ,pattern = ,object
+         while nil
+         finally (return (progn ,@body))))
+
+(defun qt-gen-rgb-img (width height)
+  ;; Generates and 8bit rgb picture
+  (make-random-state t)
+  (multiple-value-bind (root func) (generate-function)
+    (let* ((img (q+:make-qimage width height (q+::qimage.format_rgb888)))
+	   (birth (timestamp))
+	   (r (random 255))
+	   (g (random 255))
+	   (b (random 255)))
+      (loop for x below width do
+	(loop for y below height do
+	  (setf (q+:pixel img x y)
+		(qt-888-wrapper func (coords x y height width) r g b))))
+      (let ((*package* (find-package :random-function-visualization))
+	    (form (create-form birth :8-rgb r g b root width height)))
+	(list img
+	      form
+	      (format nil "~(~s~)~%~%" form)
+	      birth
+	      (format nil "~(~s~)" (nth 3 form))
+	      )))))
+
+(defun qt-recover-rgb-img (form)
+  ;; returns the same values as qt-gen-rgb-img using `form'.
+  ;; presumably the rgb/size values have been altered so a new time stamp is generated
+  (match-bind (nil nil (r g b) root (width height)) form 
+    (let ((img (q+:make-qimage width height (q+::qimage.format_rgb888)))
+	  (func (eval root))
+	  (birth (timestamp)))
+      (loop for x below width do
+	(loop for y below height do
+	  (setf (q+:pixel img x y)
+		(qt-888-wrapper func (coords x y height width) r g b))))
+      (let ((*package* (find-package :random-function-visualization))
+	    (form (create-form birth :8-rgb r g b root width height)))
+	(list img form (format nil "~(~s~)~%~%" form) birth (format nil "~(~s~)" (nth 3 form)))))))
+
+(defun qt-load-rgb-img (form)
+  ;; returns the same values as qt-gen-rgb-img using `form'.
+  (match-bind (birth color-type (r g b) root (width height)) form 
+    (let ((img (q+:make-qimage width height (q+::qimage.format_rgb888)))
+	  (func (eval root)))
+      (loop for x below width do
+	(loop for y below height do
+	  (setf (q+:pixel img x y)
+		(qt-888-wrapper func (coords x y height width) r g b))))
+      (let ((*package* (find-package :random-function-visualization))
+	    (form (create-form birth color-type r g b root width height)))
+	(list img form (format nil "~(~s~)~%~%" form) birth)))))
 
 
-(defun recover-img (width height function)
-  (let* ((func (eval function))
-	 (img (opticl:make-8-bit-rgb-image height width)))
-    (print function)
-    (loop for x below width do
-      (loop for y below height do
-	(setf (opticl:pixel img y x)
-	      (8-bit-rgb-wrapper func (/ x 1) (/ y 1)))))
-    (opticl:write-png-file "./output/expt.tiff" img)))
+(defun create-form (name-string color-type r g b root width height)
+   (list name-string color-type (list r g b) root (list width height)))
+
+
+(defun recover-img (width height info &key (save-dir "./recovered/"))
+  (ensure-directories-exist save-dir)
+  (destructuring-bind (name color-type channel-value function) info
+    (cond ((equal :8-RGB color-type) (recover-rgb-img width height name channel-value function save-dir)))))
+
+(defun recover-rgb-img (width height name channel-value function save-dir)
+  (destructuring-bind (r g b) channel-value
+    (let* ((func (eval function))
+	   (img (opticl:make-8-bit-rgb-image height width)))
+      (loop for x below width do
+	(loop for y below height do
+	  (setf (opticl:pixel img y x)
+		(8-bit-rgb-wrapper func (coords x y height width) r g b))))
+      (opticl:write-png-file (concatenate 'string save-dir
+					  (write-to-string width) "-"
+					  (write-to-string height) "-" name ".png")
+			     img))))
+      
+
+;; This is noticeably faster than doing (q+:rgb (q+:qcolor-from-rgb ...))
+(defun qt-888-wrapper (func coords r g b)
+  (+ 4278190080
+   (ash (8-bit-wrapper func coords r) 16)
+   (ash (8-bit-wrapper func coords g) 8)
+   (8-bit-wrapper func coords b)))
+
 
 (defun 8-bit-rgb-wrapper (func coords r g b)
   (values (8-bit-wrapper func coords r)
@@ -281,11 +364,11 @@
 ;;   (handler-case (rand-function)
 ;;     (style-warning (c) (generate-function)))) 
 
-(defun gen-batch (batch-size height width &key (img-color :rgb))
+(defun gen-batch (batch-size height width &key (save-dir "./output/") (img-color :rgb))
   (loop for i from 1 upto batch-size do
     (progn 
       (print i)
-      (gen-img height width :auto-save t :save-dir "./output/" :img-color img-color))))
+      (gen-img height width :auto-save t :save-dir save-dir :img-color img-color))))
 
 (defun coords (x y height width)
   (destructuring-bind (r theta) (polar-coords x y height width)
