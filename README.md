@@ -7,6 +7,8 @@ A Common Lisp project that creates interesting pictures through randomly generat
 <p align="center">
 <a href="https://i.imgur.com/VMglKHU.png"><img src="https://i.imgur.com/VMglKHU.png" width="300" height="300"></a>
 <a href="https://i.imgur.com/l8OYTux.png"><img src="https://i.imgur.com/l8OYTux.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/VzfcCdx.png"><img src="https://i.imgur.com/VzfcCdx.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/Kguy5JP.png"><img src="https://i.imgur.com/Kguy5JP.png" width="300" height="300"></a>
 <a href="https://i.imgur.com/ZvapKnh.png"><img src="https://i.imgur.com/ZvapKnh.png" width="300" height="300"></a>
 <a href="https://i.imgur.com/DERByjN.png"><img src="https://i.imgur.com/DERByjN.png" width="300" height="300"></a>
 </p>
