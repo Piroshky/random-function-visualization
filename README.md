@@ -5,21 +5,20 @@ A Common Lisp project that creates interesting pictures through randomly generat
 #### Examples:
 
 <p align="center">
-<a href="https://i.imgur.com/VMglKHU.png"><img src="https://i.imgur.com/VMglKHU.png" width="500" height="500"></a>
-
-<a href="https://i.imgur.com/l8OYTux.png"><img src="https://i.imgur.com/l8OYTux.png" width="500" height="500"></a>
-
-<a href="https://i.imgur.com/ZvapKnh.png"><img src="https://i.imgur.com/ZvapKnh.png" width="500" height="500"></a>
-
-<a href="https://i.imgur.com/DERByjN.png"><img src="https://i.imgur.com/DERByjN.png" width="500" height="500"></a>
+<a href="https://i.imgur.com/VMglKHU.png"><img src="https://i.imgur.com/VMglKHU.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/l8OYTux.png"><img src="https://i.imgur.com/l8OYTux.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/ZvapKnh.png"><img src="https://i.imgur.com/ZvapKnh.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/DERByjN.png"><img src="https://i.imgur.com/DERByjN.png" width="300" height="300"></a>
 </p>
 
 #### GUI:
 
-![GUI screenshot](https://i.imgur.com/OpFLyjG.png)
 
 You can download a binary release for linux [here](), or you can load the rfv-gui package
 found in the directory of the same name, and run (rfv-gui:main).
+
+<a href="https://i.imgur.com/OpFLyjG.png"><img src="https://i.imgur.com/OpFLyjG.png" height="600"></a>
+
 
 The GUI will save images and their text forms in the specified directory. The text forms
 will all be put into a file called "functions". Saved images can be reloaded with the Open
