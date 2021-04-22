@@ -2,7 +2,7 @@
 
 A Common Lisp project for creating interesting images with randomly generated functions.
 
-#### Examples:
+### Examples:
 <p align="center">
 <a href="https://i.imgur.com/VMglKHU.png"><img src="https://i.imgur.com/VMglKHU.png" width="300" height="300"></a>
 <a href="https://i.imgur.com/l8OYTux.png"><img src="https://i.imgur.com/l8OYTux.png" width="300" height="300"></a>
@@ -15,12 +15,11 @@ A Common Lisp project for creating interesting images with randomly generated fu
 ### Explanation and more examples:
 https://piroshky.org/random-function-visualization.html
 
-#### GUI:
+### GUI:
 You can download a binary release for linux [here](), or you can load the rfv-gui package
 found in the directory of the same name, and run (rfv-gui:main).
 
 <a href="https://i.imgur.com/OpFLyjG.png"><img src="https://i.imgur.com/OpFLyjG.png" height="600"></a>
-
 
 The GUI will save images and their text forms in the specified directory. The text forms
 will all be put into a file called "functions". Saved images can be reloaded with the Open
