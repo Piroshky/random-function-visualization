@@ -1,25 +1,25 @@
 # random-function-visualization
 
-A Common Lisp project that creates interesting pictures through randomly generating functions.
+A Common Lisp project for creating interesting images with randomly generated functions.
 
-#### Examples:
-
+### Examples:
 <p align="center">
-<a href="https://i.imgur.com/VMglKHU.png"><img src="https://i.imgur.com/VMglKHU.png" width="500" height="500"></a>
-
-<a href="https://i.imgur.com/l8OYTux.png"><img src="https://i.imgur.com/l8OYTux.png" width="500" height="500"></a>
-
-<a href="https://i.imgur.com/ZvapKnh.png"><img src="https://i.imgur.com/ZvapKnh.png" width="500" height="500"></a>
-
-<a href="https://i.imgur.com/DERByjN.png"><img src="https://i.imgur.com/DERByjN.png" width="500" height="500"></a>
+<a href="https://i.imgur.com/VMglKHU.png"><img src="https://i.imgur.com/VMglKHU.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/l8OYTux.png"><img src="https://i.imgur.com/l8OYTux.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/VzfcCdx.png"><img src="https://i.imgur.com/VzfcCdx.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/Kguy5JP.png"><img src="https://i.imgur.com/Kguy5JP.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/ZvapKnh.png"><img src="https://i.imgur.com/ZvapKnh.png" width="300" height="300"></a>
+<a href="https://i.imgur.com/DERByjN.png"><img src="https://i.imgur.com/DERByjN.png" width="300" height="300"></a>
 </p>
 
-#### GUI:
+### Explanation and more examples:
+https://piroshky.org/random-function-visualization.html
 
-![GUI screenshot](https://i.imgur.com/OpFLyjG.png)
-
+### GUI:
 You can download a binary release for linux [here](), or you can load the rfv-gui package
 found in the directory of the same name, and run (rfv-gui:main).
+
+<a href="https://i.imgur.com/OpFLyjG.png"><img src="https://i.imgur.com/OpFLyjG.png" height="600"></a>
 
 The GUI will save images and their text forms in the specified directory. The text forms
 will all be put into a file called "functions". Saved images can be reloaded with the Open
@@ -30,8 +30,3 @@ The Load Text button will try to construct an image based on what is in the text
 the text is simply a function then it will use the size and color settings as set by the
 GUI. If the text is a full form, like the type saved in the functions file, it will use
 the provided values.
-
-
-#### How it works:
-
-The functions take as arguments an x and y position, and a color value, and will return a number. Each pixel position is given to the function to produce that pixel's value. The purpose of the "color value" parameter is to add in the possibility of different outputs for different color channels.
