@@ -4,6 +4,12 @@
 (in-package :rfv-gui)
 (in-readtable :qtools)
 
+(defun set-file-select-backend-kdialog ()
+  "If kdialog is available, then use it for file selection dialogs."
+  (if (org.shirakumo.file-select::find-in-path "kdialog")
+      (setf org.shirakumo.file-select::*default-backend*
+	    'org.shirakumo.file-select.kdialog:kdialog)))
+
 (defun merge-pathnames-to-native (base-directory file-string)
   (uiop:native-namestring
    (merge-pathnames base-directory file-string)))
@@ -229,10 +235,16 @@
 (define-slot (main-window open-img-file) ()
   (declare (connected open-button (pressed)))
 
-  (let ((file-string (uiop:run-program
-		      (list "kdialog" "--getopenfilename"
-			    (uiop:native-namestring *save-dir*) "PNG Image File (*.png)")
-		      :output :string :external-format :utf-8 :ignore-error-status t)
+  (let ((file-path (org.shirakumo.file-select:existing
+		      :title "Choose Image"
+		      :filter '(("PNG Image Files" "png"))
+		      :default (pathname *save-dir*))
+
+
+	  ;; (uiop:run-program
+	  ;; 	      (list "kdialog" "--getopenfilename"
+	  ;; 		    (uiop:native-namestring *save-dir*) "PNG Image File (*.png)")
+	  ;; 	      :output :string :external-format :utf-8 :ignore-error-status t)
 		     
 	  ;; (org.shirakumo.file-select:existing
 		     ;;  :title "Choose Image" :default *save-dir*)
@@ -240,8 +252,13 @@
 	  ;; 	      main-window "Choose Image" (uiop:native-namestring *save-dir*)
 	  ;; 	      "Images (*.png *.xpm *.jpg)")
 	  ))
-    (when (string/= file-string "")
-      (let ((found-form (find-matching-form (basename file-string) (directory-namestring file-string))))
+    (when file-path
+      (let* ((file-string (namestring file-path))
+	     (found-form (find-matching-form
+			  (basename file-string)
+			 (directory-namestring file-string))))
+
+
 	;; (when (eq found-form nil) (alert "could not find ~s in file ~s~%"))
 	(let ((form (normalize-form found-form (q+:value width-spinbox) (q+:value height-spinbox))))
 	  (destructuring-bind (my-image load-form form-str name) (rfv:qt-load-rgb-img form)
@@ -264,6 +281,8 @@
 
 (define-slot (main-window set-save-dir) ()
   (declare (connected browse-button (pressed)))
+  ;; I'm going to stick with the qt filedialog for getting a directory
+  ;; because it's better than kdialog's for some reason
   (let* ((file-string (q+:qfiledialog-get-existing-directory
 		       main-window "Save World"
 		       (uiop:native-namestring *save-dir*)))
@@ -387,5 +406,6 @@
       (q+:add-stretch name-label-layout)
       (q+:add-layout layout name-label-layout ))))
 
-(defun main () 
+(defun main ()
+  (set-file-select-backend-kdialog)
   (with-main-window (window 'main-window)))

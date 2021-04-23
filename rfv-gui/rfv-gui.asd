@@ -8,4 +8,5 @@
   :build-operation "qt-program-op"
   :build-pathname "rfv-gui-exec"
   :entry-point "rfv-gui:main"
-  :components ((:file "rfv-gui")))
+  :components ((:file "kdialog")
+	       (:file "rfv-gui")))
