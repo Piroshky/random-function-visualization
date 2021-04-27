@@ -16,7 +16,7 @@ A Common Lisp project for creating interesting images with randomly generated fu
 https://piroshky.org/random-function-visualization.html
 
 ### GUI:
-You can download a binary release for linux [here](), or you can load the rfv-gui package
+You can download a binary release for linux [here](https://github.com/Pyrizhki/random-function-visualization/releases/tag/v1.0), or you can load the rfv-gui package
 found in the directory of the same name, and run (rfv-gui:main).
 
 <a href="https://i.imgur.com/OpFLyjG.png"><img src="https://i.imgur.com/OpFLyjG.png" height="600"></a>
