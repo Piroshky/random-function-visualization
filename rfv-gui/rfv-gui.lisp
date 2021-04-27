@@ -27,11 +27,14 @@
       (append form (list (list  width height)))))
 
 (defun find-matching-form (form-name function-file-directory)
-  (let ((*package* (find-package :random-function-visualization)))
-  (iterate:iterate
-    (iterate:for form in-file
-		 (merge-pathnames-to-native function-file-directory "functions"))
-    (iterate:finding form such-that (string= form-name (car form))))))
+  (let ((*package* (find-package :random-function-visualization))
+	(string-path (merge-pathnames-to-native function-file-directory "functions")))
+    (handler-case
+	(iterate:iterate
+	  (iterate:for form in-file string-path)
+	  (iterate:finding form such-that (string= form-name (car form))))
+      (sb-ext:file-does-not-exist (c) (list nil (format nil "~a" c)))
+      (type-error () (list nil (format nil "Could not find form named: `~a` in file: ~a" form-name string-path))))))
 
 (defvar *save-dir* (uiop:parse-native-namestring (sb-posix:getcwd) :ensure-directory t))
 (defvar *function-save-file* "functions")
@@ -257,27 +260,26 @@
 	     (found-form (find-matching-form
 			  (basename file-string)
 			 (directory-namestring file-string))))
+	(if (eq (car found-form) nil)
+	    (when (> (length found-form) 1)
+	      (q+:qmessagebox-warning main-window "Error!" (format NIL "~a" (cadr found-form))))
+	    
+	    (let ((form (normalize-form found-form (q+:value width-spinbox) (q+:value height-spinbox))))
+	      (destructuring-bind (my-image load-form form-str name) (rfv:qt-load-rgb-img form)
+		(setf *current-form* load-form)
+		(setf (q+:pixmap image-label) (q+:qpixmap-from-image my-image))
+		(q+:repaint image-label)
+		
+		(setf *current-form-string* form-str)
+		(setf *current-function-name* name)
 
-
-	;; (when (eq found-form nil) (alert "could not find ~s in file ~s~%"))
-	(let ((form (normalize-form found-form (q+:value width-spinbox) (q+:value height-spinbox))))
-	  (destructuring-bind (my-image load-form form-str name) (rfv:qt-load-rgb-img form)
-	    (setf *current-form* load-form)
-	    (setf (q+:pixmap image-label) (q+:qpixmap-from-image my-image))
-	    (q+:repaint image-label)
- 
-	    (setf *current-form-string* form-str)
-	    (setf *current-function-name* name)
-
-	    (setf (q+:text text) form-str)
-	    (setf (q+:text function-name-label) name)
-	    (destructuring-bind (r g b) (nth 2 *current-form*)
-	      (setf (q+:value (slot-value red-spinbox-slider 'spinbox)) r)
-	      (setf (q+:value (slot-value green-spinbox-slider 'spinbox)) g)
-	      (setf (q+:value (slot-value blue-spinbox-slider 'spinbox)) b)))
-	)
-     
-      ))))
+		(setf (q+:text text) form-str)
+		(setf (q+:text function-name-label) name)
+		(destructuring-bind (r g b) (nth 2 *current-form*)
+		  (setf (q+:value (slot-value red-spinbox-slider 'spinbox)) r)
+		  (setf (q+:value (slot-value green-spinbox-slider 'spinbox)) g)
+		  (setf (q+:value (slot-value blue-spinbox-slider 'spinbox)) b)))
+	      ))))))
 
 (define-slot (main-window set-save-dir) ()
   (declare (connected browse-button (pressed)))
